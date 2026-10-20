@@ -1,0 +1,39 @@
+---
+import PostList from '../components/PostList.astro';
+import { SITE, SOCIAL } from '../consts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPosts } from '../utils/posts';
+
+const posts = await getPosts();
+const recent = posts.slice(0, 8);
+---
+
+<BaseLayout>
+	<section class="hero">
+		<h1>{SITE.greeting}</h1>
+		<p class="hero-intro">{SITE.intro}</p>
+		<p class="hero-links">
+			<a href="/about/">关于我</a>
+			{
+				SOCIAL.map(({ label, href }) => (
+					<a
+						href={href}
+						target={href.startsWith('http') ? '_blank' : undefined}
+						rel={href.startsWith('http') ? 'noopener me' : undefined}
+					>
+						{label}
+					</a>
+				))
+			}
+			<a href="/rss.xml">RSS 订阅</a>
+		</p>
+	</section>
+
+	<section aria-labelledby="recent-heading">
+		<div class="section-head">
+			<h2 id="recent-heading">最近文章</h2>
+			<a href="/blog/">全部文章 →</a>
+		</div>
+		{recent.length > 0 ? <PostList posts={recent} /> : <p class="empty">还没有文章，敬请期待。</p>}
+	</section>
+</BaseLayout>

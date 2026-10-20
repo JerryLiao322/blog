@@ -1,0 +1,27 @@
+---
+import { render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getPosts, type Post } from '../../utils/posts';
+
+export async function getStaticPaths() {
+	const posts = await getPosts();
+	return posts.map((post, i) => ({
+		params: { slug: post.id },
+		// 列表从新到旧：前一项是更新的文章，后一项是更早的文章
+		props: { post, newer: posts[i - 1], older: posts[i + 1] },
+	}));
+}
+
+interface Props {
+	post: Post;
+	newer?: Post;
+	older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<PostLayout post={post} headings={headings} newer={newer} older={older}>
+	<Content />
+</PostLayout>

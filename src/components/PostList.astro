@@ -1,0 +1,32 @@
+---
+import { isoDate } from '../utils/date';
+import type { Post } from '../utils/posts';
+
+interface Props {
+	posts: Post[];
+	/** 紧凑模式：只显示"月-日"和标题，用于按年份归档的列表 */
+	compact?: boolean;
+}
+
+const { posts, compact = false } = Astro.props;
+---
+
+<ul class:list={['post-list', { compact }]}>
+	{
+		posts.map((post) => {
+			const date = isoDate(post.data.pubDate);
+			return (
+				<li class="post-item">
+					<time datetime={date}>{compact ? date.slice(5) : date}</time>
+					<div>
+						<a class="post-item-title" href={`/blog/${post.id}/`}>
+							{post.data.title}
+						</a>
+						{post.data.draft && <span class="badge">草稿</span>}
+						{!compact && post.data.description && <p>{post.data.description}</p>}
+					</div>
+				</li>
+			);
+		})
+	}
+</ul>

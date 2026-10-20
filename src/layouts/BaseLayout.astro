@@ -1,0 +1,30 @@
+---
+// 所有页面共用的外框：页眉 + 内容 + 页脚
+import type { ImageMetadata } from 'astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../consts';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: ImageMetadata;
+	type?: 'website' | 'article';
+}
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+	<head>
+		<BaseHead {...Astro.props} />
+	</head>
+	<body>
+		<a class="skip-link" href="#main">跳到正文</a>
+		<Header />
+		<main id="main" class="container">
+			<slot />
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,0 +1,27 @@
+---
+import PostList from '../../components/PostList.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPosts, groupByYear } from '../../utils/posts';
+
+const posts = await getPosts();
+const years = groupByYear(posts);
+---
+
+<BaseLayout title="文章" description="全部文章，按时间排列。">
+	<header class="page-header">
+		<h1>文章</h1>
+		<p>共 {posts.length} 篇，按时间倒序排列。</p>
+	</header>
+	{
+		years.map(([year, list]) => (
+			<section class="year-group" aria-labelledby={`year-${year}`}>
+				<h2 class="year" id={`year-${year}`}>
+					{year}
+					<span>{list.length} 篇</span>
+				</h2>
+				<PostList posts={list} compact />
+			</section>
+		))
+	}
+	{posts.length === 0 && <p class="empty">还没有文章。</p>}
+</BaseLayout>

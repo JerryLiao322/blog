@@ -1,0 +1,35 @@
+<button class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式">
+	<svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+		<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path>
+	</svg>
+	<svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+		<circle cx="12" cy="12" r="4"></circle>
+		<path
+			d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+		></path>
+	</svg>
+</button>
+
+<script>
+	const root = document.documentElement;
+	const savedTheme = () => {
+		try {
+			return localStorage.getItem('theme');
+		} catch {
+			return null;
+		}
+	};
+
+	document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+		root.dataset.theme = next;
+		try {
+			localStorage.setItem('theme', next);
+		} catch {}
+	});
+
+	// 没有手动切换过时，跟随系统的深浅色设置
+	matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+		if (!savedTheme()) root.dataset.theme = event.matches ? 'dark' : 'light';
+	});
+</script>

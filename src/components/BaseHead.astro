@@ -1,0 +1,62 @@
+---
+// 每个页面 <head> 里的内容：标题、描述、图标、分享卡片等
+import '../styles/global.css';
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import { SITE } from '../consts';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: ImageMetadata;
+	type?: 'website' | 'article';
+}
+
+const { title, description = SITE.description, image, type = 'website' } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image && new URL((await getImage({ src: image, width: 1200 })).src, Astro.site);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>{pageTitle}</title>
+<meta name="description" content={description} />
+<meta name="author" content={SITE.author} />
+<link rel="canonical" href={canonicalURL} />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={SITE.title}
+	href={new URL('rss.xml', Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
+
+<!-- 分享到社交平台时显示的卡片 -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.title} />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title ?? SITE.title} />
+<meta property="og:description" content={description} />
+{ogImage && <meta property="og:image" content={ogImage} />}
+<meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+
+<script is:inline>
+	// 在页面显示之前决定用浅色还是深色，避免闪一下
+	(() => {
+		let theme = null;
+		try {
+			theme = localStorage.getItem('theme');
+		} catch {}
+		if (theme !== 'light' && theme !== 'dark') {
+			theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		}
+		document.documentElement.dataset.theme = theme;
+	})();
+</script>

@@ -1,0 +1,82 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+// 只收录二、三级标题（不含脚注区）；少于 3 个时不显示目录
+const items = Astro.props.headings.filter(
+	(h) => (h.depth === 2 || h.depth === 3) && h.slug !== 'footnote-label',
+);
+const topDepth = Math.min(...items.map((h) => h.depth));
+---
+
+{
+	items.length >= 3 && (
+		<>
+			{/* 窄屏：文章开头的折叠目录 */}
+			<details class="toc toc-inline">
+				<summary>目录</summary>
+				<ol>
+					{items.map((h) => (
+						<li class:list={{ sub: h.depth > topDepth }}>
+							<a href={`#${h.slug}`}>{h.text}</a>
+						</li>
+					))}
+				</ol>
+			</details>
+			{/* 宽屏：固定在正文右侧的目录 */}
+			<aside class="toc toc-side" aria-label="文章目录">
+				<div class="toc-sticky">
+					<p class="toc-title">目录</p>
+					<ol>
+						{items.map((h) => (
+							<li class:list={{ sub: h.depth > topDepth }}>
+								<a href={`#${h.slug}`}>{h.text}</a>
+							</li>
+						))}
+					</ol>
+				</div>
+			</aside>
+		</>
+	)
+}
+
+<script>
+	// 滚动时高亮当前所在的小节
+	const links = new Map(
+		[...document.querySelectorAll<HTMLAnchorElement>('.toc-side a')].map((a) => [
+			decodeURIComponent(a.getAttribute('href')!.slice(1)),
+			a,
+		]),
+	);
+	const headings = [...document.querySelectorAll<HTMLElement>('.prose :is(h2, h3)[id]')].filter((h) =>
+		links.has(h.id),
+	);
+
+	let ticking = false;
+	const update = () => {
+		ticking = false;
+		let current = headings[0];
+		for (const heading of headings) {
+			if (heading.getBoundingClientRect().top > 120) break;
+			current = heading;
+		}
+		for (const [id, link] of links) link.classList.toggle('active', id === current?.id);
+	};
+
+	if (headings.length > 0) {
+		addEventListener(
+			'scroll',
+			() => {
+				if (!ticking) {
+					ticking = true;
+					requestAnimationFrame(update);
+				}
+			},
+			{ passive: true },
+		);
+		update();
+	}
+</script>
